@@ -1,4 +1,5 @@
 const gulp = require('gulp')
+const runSeq = require('run-sequence')
 const sass = require('gulp-sass')
 const sourcemaps = require('gulp-sourcemaps')
 const svgSprite = require('gulp-svg-sprites')
@@ -9,7 +10,6 @@ const source = require('vinyl-source-stream')
 const del = require('del')
 
 var config = {
-  base:    __dirname + '/',
   src:     __dirname + '/src',
   htmlin:  __dirname + '/src/html/**/*.html',
   cssin:   __dirname + '/src/css/**/*.css',
@@ -32,10 +32,10 @@ gulp.task('serve', ['sass', 'scripts', 'images', 'html'], function () {
     server: config.htmlout
   })
 
-  gulp.watch(config.jsin, ['scripts', 'reload'])
-  gulp.watch(config.cssin, ['sass', 'reload'])
-  gulp.watch(config.imgin, ['images', 'reload'])
-  gulp.watch(config.htmlin, ['html', 'reload'])
+  gulp.watch(config.jsin, () => runSeq(['scripts', 'reload']))
+  gulp.watch(config.cssin, () => runSeq(['sass', 'reload']))
+  gulp.watch(config.imgin, () => runSeq(['images', 'reload']))
+  gulp.watch(config.htmlin, () => runSeq(['html', 'reload']))
 })
 
 gulp.task('sprites', function() {
@@ -56,7 +56,7 @@ gulp.task('sass', function () {
 gulp.task('scripts', function () {
   return browserify({
     entries: config.jsentry,
-    extensions: ['.js', '.jsx'],
+    extensions: ['.js'],
     debug: true})
     .transform(babelify)
     .bundle()
